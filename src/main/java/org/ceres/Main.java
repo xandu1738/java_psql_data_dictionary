@@ -28,7 +28,8 @@ public class Main {
 
             // Query to list all tables
             String sqlTables = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'";
-            rsTables = stmt.executeQuery(sqlTables);
+            Statement stmt2 = conn.createStatement();
+            rsTables = stmt2.executeQuery(sqlTables);
 
             while (rsTables.next()) {
                 String tableName = rsTables.getString("table_name");
@@ -37,9 +38,10 @@ public class Main {
                 // Query to get column details
                 String sqlColumns = String.format(
                         "SELECT column_name, data_type, is_nullable, column_default, " +
-                                "character_maximum_length, numeric_precision, numeric_scale " +
-                                "FROM information_schema.columns WHERE table_name = '%s'", tableName);
-                rsColumns = stmt.executeQuery(sqlColumns);
+                        "character_maximum_length, numeric_precision, numeric_scale " +
+                        "FROM information_schema.columns WHERE table_name = '%s'", tableName);
+                Statement stmt3 = conn.createStatement();
+                rsColumns = stmt3.executeQuery(sqlColumns);
 
                 while (rsColumns.next()) {
                     String columnName = rsColumns.getString("column_name");
@@ -62,10 +64,11 @@ public class Main {
                 // Query to get primary keys
                 String sqlPrimaryKeys = String.format(
                         "SELECT a.attname AS column_name " +
-                                "FROM pg_index i " +
-                                "JOIN pg_attribute a ON a.attnum = ANY(i.indkey) " +
-                                "WHERE i.indrelid = '%s'::regclass AND i.indisprimary", tableName);
-                rsPrimaryKeys = stmt.executeQuery(sqlPrimaryKeys);
+                        "FROM pg_index i " +
+                        "JOIN pg_attribute a ON a.attnum = ANY(i.indkey) " +
+                        "WHERE i.indrelid = '%s'::regclass AND i.indisprimary", tableName);
+                Statement stmt4 = conn.createStatement();
+                rsPrimaryKeys = stmt4.executeQuery(sqlPrimaryKeys);
 
                 System.out.print("  Primary Keys: ");
                 while (rsPrimaryKeys.next()) {
@@ -77,12 +80,13 @@ public class Main {
                 // Query to get foreign keys
                 String sqlForeignKeys = String.format(
                         "SELECT kcu.column_name, ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name " +
-                                "FROM information_schema.key_column_usage kcu " +
-                                "JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = kcu.constraint_name " +
-                                "WHERE kcu.table_name = '%s' AND kcu.constraint_name IN (" +
-                                "SELECT constraint_name FROM information_schema.table_constraints " +
-                                "WHERE constraint_type = 'FOREIGN KEY' AND table_name = '%s')", tableName, tableName);
-                rsForeignKeys = stmt.executeQuery(sqlForeignKeys);
+                        "FROM information_schema.key_column_usage kcu " +
+                        "JOIN information_schema.constraint_column_usage ccu ON ccu.constraint_name = kcu.constraint_name " +
+                        "WHERE kcu.table_name = '%s' AND kcu.constraint_name IN (" +
+                        "SELECT constraint_name FROM information_schema.table_constraints " +
+                        "WHERE constraint_type = 'FOREIGN KEY' AND table_name = '%s')", tableName, tableName);
+                Statement stmt5 = conn.createStatement();
+                rsForeignKeys = stmt5.executeQuery(sqlForeignKeys);
 
                 System.out.print("  Foreign Keys: ");
                 while (rsForeignKeys.next()) {
@@ -96,8 +100,9 @@ public class Main {
                 // Query to get column comments
                 String sqlComments = String.format(
                         "SELECT column_name, col_description('%s'::regclass, ordinal_position) AS column_comment " +
-                                "FROM information_schema.columns WHERE table_name = '%s'", tableName, tableName);
-                rsComments = stmt.executeQuery(sqlComments);
+                        "FROM information_schema.columns WHERE table_name = '%s'", tableName, tableName);
+                Statement stmt6 = conn.createStatement();
+                rsComments = stmt6.executeQuery(sqlComments);
 
                 while (rsComments.next()) {
                     String columnName = rsComments.getString("column_name");
